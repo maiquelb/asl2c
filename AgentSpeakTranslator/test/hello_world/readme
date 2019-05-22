@@ -1,0 +1,4 @@
+* To translate from .asl to .c:
+  - The directory must contain the files hello_world.conf, hello_world.asl, and types.h
+  - From the AgentSpeakTranslator directory, type:
+          # ./src/agentspeak -c test/hello_world/hello_world.conf
