@@ -1,13 +1,14 @@
-// initial beliefs
-testBelief(0).
-
-// initial goal
 !start.
 
-+!start : not started
-  <- print;
++!start : not(started)
+  <- print("starting...");
      +started;
      +testSetable(0);
-     !start. // new focus!
+     !count. // new focus!
+     
++!count : testSetable(X)
+  <-  print("counting...");
+      +testSetable(X);
+      !count.
   
 

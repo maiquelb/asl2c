@@ -21,7 +21,8 @@ void set_testSetable(int param0)
 typedef enum
 {
   NONE,
-  ADD_ACHIEVE_START
+  ADD_ACHIEVE_START,
+  ADD_ACHIEVE_COUNT
 } triggert;
 
 /* events */
@@ -37,6 +38,9 @@ static bool is_triggering(eventt event)
   switch (event.trigger)
   {
     case ADD_ACHIEVE_START:
+      triggering = true;
+      break;
+    case ADD_ACHIEVE_COUNT:
       triggering = true;
       break;
     default:  // nothing to do
@@ -130,10 +134,10 @@ static eventt get_next_event(void)
 }
 
 /* internal trigger functions */
-static void internal_achieve_start(void)
+static void internal_achieve_count(void)
 {
   eventt event;
-  event.trigger = ADD_ACHIEVE_START;
+  event.trigger = ADD_ACHIEVE_COUNT;
   add_event_to_complete(event);
 }
 
@@ -145,17 +149,26 @@ void achieve_start(void)
   add_external_event(event);
 }
 
+void achieve_count(void)
+{
+  eventt event;
+  event.trigger = ADD_ACHIEVE_COUNT;
+  add_external_event(event);
+}
+
 /* applicable plan selection declarations */
 static void add_achieve_start(void);
+
+static void add_achieve_count(void);
 
 /* plans */
 /*
 +!start()
    : not started()
-   <- print();
+   <- print("starting...");
       +started();
       +testSetable(0);
-      !start()
+      !count()
 */
 static bool add_achieve_start_plan0(void)
 {
@@ -166,11 +179,41 @@ static bool add_achieve_start_plan0(void)
     return false;
   }
   /* plan body */
-  print();
+  print("starting...");
   started_set = true;
   testSetable_set = true;
   testSetable_param0 = 0;
-  internal_achieve_start();
+  internal_achieve_count();
+  return true;
+}
+
+/*
++!count()
+   : testSetable(X)
+   <- print("counting...");
+      ?testSetable(Y);
+      +testSetable(Y);
+      !count()
+*/
+static bool add_achieve_count_plan0(void)
+{
+  /* instantiate trigger parameters */
+  /* plan context, i.e., guards */
+  if (!testSetable_set)
+  {
+    return false;
+  }
+  int X = testSetable_param0;
+  /* plan body */
+  print("counting...");
+  if (!testSetable_set)
+  {
+    // TODO: this case needs to be specified
+  }
+  int Y = testSetable_param0;
+  testSetable_set = true;
+  testSetable_param0 = Y;
+  internal_achieve_count();
   return true;
 }
 
@@ -185,14 +228,22 @@ static void add_achieve_start(void)
   return;
 }
 
+static void add_achieve_count(void)
+{
+  if (add_achieve_count_plan0())
+  {
+    return;
+  }
+  // TODO: Handle the case where no plan is applicable
+  return;
+}
+
 /* init */
 void init(void)
 {
   // initialise event queue
   init_events();
   // set initial beliefs
-  testBelief_set = true;
-  testBelief_param0 = 0;
   // initial goal: !start()
   add_achieve_start();
 }
@@ -221,6 +272,9 @@ void next_step(void)
   {
     case ADD_ACHIEVE_START:
       add_achieve_start();
+      break;
+    case ADD_ACHIEVE_COUNT:
+      add_achieve_count();
       break;
     default:  // nothing to do
       break;

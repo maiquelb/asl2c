@@ -15,6 +15,7 @@ void updateBeliefs(void);
 
 /* "public" trigger functions */
 void achieve_start(void);
+void achieve_count(void);
 
  /* setters for belief base */
 void set_testSetable(int);

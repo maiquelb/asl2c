@@ -2,3 +2,5 @@
   - The directory must contain the files hello_world.conf, hello_world.asl, and types.h
   - From the AgentSpeakTranslator directory, type:
           # ./src/agentspeak -c test/hello_world/hello_world.conf
+
+* Running the example: compile and execute the file run.c
